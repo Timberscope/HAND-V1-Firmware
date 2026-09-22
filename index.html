@@ -19,6 +19,7 @@
         .help a{color:#4CAF50;text-decoration:none;font-weight:bold;}
         .help a:hover{text-decoration:underline;}
         .logo{max-width:200px;width:60%;height:auto;margin-bottom:10px;}
+        .version{font-size:15px;color:#333;font-weight:bold;margin-bottom:4px;}
     </style>
 </head>
 <body>
@@ -28,6 +29,7 @@
         <p id="statusText" class="status">Locating latest HAND firmware...</p>
 
         <div class="section">
+            <p id="versionText" class="version"></p>
             <button id="downloadBtn" class="button-update" disabled>Download Latest Firmware</button>
             <p class="help">New firmware not working as you want? <a href="https://github.com/Timberscope/HAND-V1-Firmware/releases" target="_blank" rel="noopener">Download previous firmware</a></p>
         </div>
@@ -40,6 +42,7 @@
         // ---------------------
 
         var statusText = document.getElementById('statusText');
+        var versionText = document.getElementById('versionText');
         var downloadBtn = document.getElementById('downloadBtn');
         var latestBinUrl = null;
 
@@ -65,6 +68,9 @@
 
                     if (binAsset && binAsset.browser_download_url) {
                         latestBinUrl = binAsset.browser_download_url;
+                        if (data.tag_name) {
+                            versionText.textContent = 'Latest version: ' + data.tag_name;
+                        }
                         setStatus('Latest firmware ready to download.', false);
                         downloadBtn.disabled = false;
                     } else {
