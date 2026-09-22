@@ -2,42 +2,88 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Downloading Latest HAND Firmware...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAND Firmware Download</title>
+    <style>
+        body{font-family:Arial,sans-serif;margin:20px;background:#f5f5f5;}
+        .container{background:white;border-radius:10px;padding:20px;max-width:720px;margin:40px auto;box-shadow:0 2px 10px rgba(0,0,0,0.1);text-align:center;}
+        h1{color:#333;}
+        p{color:#444;}
+        .status{font-size:14px;color:#666;margin-bottom:20px;}
+        .status.err{color:#f44336;font-weight:bold;}
+        button, .button-update{background:#4CAF50;color:white;padding:14px 20px;border:none;border-radius:4px;cursor:pointer;margin-top:12px;width:100%;font-size:18px;font-weight:bold;}
+        button:hover, .button-update:hover{background:#45a049;}
+        .section{border-top:1px solid #eee;margin-top:20px;padding-top:20px;}
+        small{color:#666;}
+        .help{font-size:13px;color:#666;margin-top:12px;}
+        .help a{color:#4CAF50;text-decoration:none;font-weight:bold;}
+        .help a:hover{text-decoration:underline;}
+        .logo{max-width:200px;width:60%;height:auto;margin-bottom:10px;}
+    </style>
 </head>
 <body>
-    <p>Locating latest HAND firmware... Download will begin shortly.</p>
+    <div class="container">
+        <img class="logo" src="Timberscope-Logo-2024.png" alt="Timberscope logo">
+        <h1>HAND Firmware Download</h1>
+        <p id="statusText" class="status">Locating latest HAND firmware...</p>
+
+        <div class="section">
+            <button id="downloadBtn" class="button-update" disabled>Download Latest Firmware</button>
+            <p class="help">New firmware not working as you want? <a href="https://github.com/Timberscope/HAND-V1-Firmware/releases" target="_blank" rel="noopener">Download previous firmware</a></p>
+        </div>
+    </div>
 
     <script>
         // --- CONFIGURATION ---
-        const OWNER = "Timberscope";
-        const REPO = "HAND-V1-Firmware";
+        var OWNER = "Timberscope";
+        var REPO = "HAND-V1-Firmware";
         // ---------------------
 
-        async function redirectToLatestBin() {
-            try {
-                // Fetch release details directly from the public GitHub API
-                const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`);
-                if (!response.ok) throw new Error('Network response failure');
-                
-                const data = await response.json();
-                
-                // Scan the release assets to find the first file ending with .bin
-                const binAsset = data.assets.find(asset => asset.name.endsWith('.bin'));
+        var statusText = document.getElementById('statusText');
+        var downloadBtn = document.getElementById('downloadBtn');
+        var latestBinUrl = null;
 
-                if (binAsset && binAsset.browser_download_url) {
-                    // Instantly forward the user to the absolute download URL
-                    window.location.href = binAsset.browser_download_url;
-                } else {
-                    document.body.innerHTML = "<p>Error: No .bin asset found in the latest release.</p>";
-                }
-            } catch (error) {
-                console.error(error);
-                document.body.innerHTML = "<p>Error fetching the latest update. Please try again later.</p>";
-            }
+        function setStatus(msg, isErr) {
+            statusText.textContent = msg;
+            statusText.className = 'status' + (isErr ? ' err' : '');
         }
 
-        // Trigger on page load
-        redirectToLatestBin();
+        function fetchLatestBin() {
+            fetch('https://api.github.com/repos/' + OWNER + '/' + REPO + '/releases/latest')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Network response failure');
+                    return response.json();
+                })
+                .then(function(data) {
+                    var binAsset = null;
+                    for (var i = 0; i < data.assets.length; i++) {
+                        if (data.assets[i].name.indexOf('.bin', data.assets[i].name.length - 4) !== -1) {
+                            binAsset = data.assets[i];
+                            break;
+                        }
+                    }
+
+                    if (binAsset && binAsset.browser_download_url) {
+                        latestBinUrl = binAsset.browser_download_url;
+                        setStatus('Latest firmware ready to download.', false);
+                        downloadBtn.disabled = false;
+                    } else {
+                        setStatus('Error: No .bin asset found in the latest release.', true);
+                    }
+                })
+                .catch(function(error) {
+                    console.error(error);
+                    setStatus('Error fetching the latest update. Please try again later.', true);
+                });
+        }
+
+        downloadBtn.addEventListener('click', function() {
+            if (latestBinUrl) {
+                window.location.href = latestBinUrl;
+            }
+        });
+
+        fetchLatestBin();
     </script>
 </body>
 </html>
