@@ -25,13 +25,20 @@
 <body>
     <div class="container">
         <img class="logo" src="Timberscope-Logo-2024.png" alt="Timberscope logo">
-        <h1>HAND Firmware Download</h1>
-        <p id="statusText" class="status">Locating latest HAND firmware...</p>
+        <h1>HAND Downloads</h1>
 
         <div class="section">
-            <p id="versionText" class="version"></p>
-            <button id="downloadBtn" class="button-update" disabled>Download Latest Firmware</button>
-            <p class="help">New firmware not working as you want? <a href="https://github.com/Timberscope/HAND-V1-Firmware/releases" target="_blank" rel="noopener">Download previous firmware</a></p>
+            <p id="statusText" class="status">Locating latest HAND firmware...</p>
+            <div id="firmwareContent" style="display:none;">
+                <p id="versionText" class="version"></p>
+                <button id="downloadBtn" class="button-update">Download Latest Firmware</button>
+                <p class="help">New firmware not working as you want? <a href="https://github.com/Timberscope/HAND-V1-Firmware/releases" target="_blank" rel="noopener">Download previous firmware</a></p>
+            </div>
+        </div>
+
+        <div class="section">
+            <p class="version">HAND Electronics Handbook</p>
+            <a class="button-update" href="HAND_Electronics_Handbook.pdf" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;text-decoration:none;">Download Electronics Handbook</a>
         </div>
     </div>
 
@@ -44,6 +51,7 @@
         var statusText = document.getElementById('statusText');
         var versionText = document.getElementById('versionText');
         var downloadBtn = document.getElementById('downloadBtn');
+        var firmwareContent = document.getElementById('firmwareContent');
         var latestBinUrl = null;
 
         function setStatus(msg, isErr) {
@@ -71,8 +79,8 @@
                         if (data.tag_name) {
                             versionText.textContent = 'Latest version: ' + data.tag_name;
                         }
-                        setStatus('Latest firmware ready to download.', false);
-                        downloadBtn.disabled = false;
+                        statusText.style.display = 'none';
+                        firmwareContent.style.display = 'block';
                     } else {
                         setStatus('Error: No .bin asset found in the latest release.', true);
                     }
